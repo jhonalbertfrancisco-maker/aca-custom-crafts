@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ACA CUSTOM CRAFTS - Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#ff1a8a;--purple:#8b5cf6;--blue:#0ea5e9;--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--green:#10b981;--aca-gradient:linear-gradient(135deg,var(--pink) 0%,var(--purple) 50%,var(--blue) 100%)}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;min-height:100vh}
+.sidebar{width:290px;background:linear-gradient(180deg,#0f172a 0%,#1e1b4b 100%);color:#fff;position:fixed;height:100vh;overflow-y:auto;z-index:50;transition:left .3s}
+.brand{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;gap:10px;align-items:center}
+.brand-logo{width:44px;height:44px;border-radius:12px;background:var(--aca-gradient);display:grid;place-items:center;font-weight:900}
+.brand h1{font-size:13px;line-height:1.1}
+.brand p{font-size:9px;opacity:.6;margin-top:2px}
+.nav{padding:10px}
+.nav-item{display:flex;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.7);margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.active{background:var(--aca-gradient);color:#fff}
+.main{margin-left:290px;flex:1;min-width:0}
+.topbar{height:60px;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;padding:0 16px;position:sticky;top:0;z-index:20}
+.btn{border:0;border-radius:10px;padding:9px 14px;font-weight:600;font-size:13px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.btn-primary{background:var(--aca-gradient);color:#fff}
+.btn-ghost{background:#fff;border:1px solid var(--border)}
+.content{padding:20px}
+.grid{display:grid;gap:14px}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.card-pad{padding:16px}
+.input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px}
+.table-wrap{overflow:auto;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:10px 12px;background:#f8fafc;color:var(--muted);font-size:11px;text-transform:uppercase;text-align:left}
+td{padding:10px 12px;border-top:1px solid var(--border)}
+.alert{padding:10px 12px;border-radius:10px;font-size:12px;display:flex;gap:8px}
+.alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.alert-success{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+.sync-badge{position:fixed;bottom:16px;right:16px;background:#0f172a;color:#fff;padding:8px 14px;border-radius:999px;font-size:12px;z-index:99;display:flex;gap:6px;align-items:center}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.product-img{width:100%;height:140px;object-fit:cover;background:#f1f5f9;display:grid;place-items:center;font-size:36px;border-radius:10px}
+.product-img img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;place-items:center;padding:16px}
+.modal-bg.open{display:grid}
+.modal{background:#fff;border-radius:16px;max-width:720px;width:100%;max-height:90vh;overflow:auto}
+.modal-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff}
+.modal-body{padding:16px}
+.image-upload-area{border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:#f8fafc}
+.customer-mode .admin-only{display:none !important}
+@media(max-width:768px){
+  .sidebar{left:-100%;width:85%;max-width:320px}
+  .sidebar.mobile-open{left:0}
+  .main{margin-left:0}
+  .grid-4,.grid-3,.grid-2{grid-template-columns:1fr}
+  .content{padding:12px}
+  .topbar{padding:0 10px}
+  .mobile-menu-btn{display:flex !important}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:49}
+  .sidebar-overlay.show{display:block}
+}
+.mobile-menu-btn{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:#fff;align-items:center;justify-content:center;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobile()"></div>
+<div class="sync-badge"><div class="sync-dot"></div><span id="syncStatus">🟢 Live Sync ON</span></div>
+<div class="app">
+<div class="sidebar" id="sidebar">
+<div class="brand"><div class="brand-logo">ACA</div><div><h1>ACA CUSTOM CRAFTS</h1><p>ADMIN • SYNCED • V5</p></div></div>
+<div class="nav" id="nav"></div>
+<div style="padding:12px;margin-top:auto">
+<div style="background:rgba(255,255,255,.06);border-radius:10px;padding:10px;font-size:11px">
+<div style="font-weight:700;opacity:.8">CUSTOMER LINK (share)</div>
+<div id="custLink" style="word-break:break-all;margin:6px 0;opacity:.9;font-size:10px"></div>
+<button class="btn btn-primary" style="width:100%;padding:6px;font-size:11px" onclick="copyLink()">📋 Copy Customer Link</button>
+<div style="margin-top:8px"><b>GCash:</b> 0960 658 6826<br>Jhon Albert Francisco</div>
+</div>
+</div>
+</div>
+<div class="main">
+<div class="topbar">
+<div style="display:flex;gap:8px;align-items:center">
+<button class="mobile-menu-btn" id="mobileBtn" onclick="openMobile()">☰</button>
+<span style="font-weight:800">Dashboard</span>
+<span id="orderBadge" style="background:var(--pink);color:#fff;padding:3px 8px;border-radius:999px;font-size:11px">0 Orders</span>
+<span id="syncText" style="font-size:11px;color:var(--muted)">Firebase Connected</span>
+</div>
+<div style="display:flex;gap:6px">
+<button class="btn btn-ghost" onclick="pushAllProducts()">⬆️ Push Products to Store</button>
+<button class="btn btn-ghost" onclick="exportOrders()">📤 Export</button>
+</div>
+</div>
+<div class="content" id="content"></div>
+</div>
+</div>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBox"></div></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot, query, orderBy, deleteDoc, updateDoc, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCfqeMHYtCSmu3wv8BnSTq2TYBH2e3vXeg",
+  authDomain: "aca-custom-crafts-b77c6.firebaseapp.com",
+  projectId: "aca-custom-crafts-b77c6",
+  storageBucket: "aca-custom-crafts-b77c6.firebasestorage.app",
+  messagingSenderId: "743474524587",
+  appId: "1:743474524587:web:278448bc76109552af62ee"
+};
+
+let db, isFirebase=true;
+try{
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  window.db=db;
+  console.log('Firebase OK');
+}catch(e){ console.log('Firebase fail',e); isFirebase=false; document.getElementById('syncStatus').innerText='⚠️ Offline - Local Only'; }
+
+const OWNER = { whatsapp:'639606586826', email:'jhonalbert.francsico01@gmail.com' };
+const LS={products:'aca_products_v5',orders:'aca_orders_v5',cart:'aca_cart_v5',materials:'aca_mat_v5',settings:'aca_settings_v5'};
+const URL_PARAMS = new URLSearchParams(location.search);
+const IS_CUSTOMER_VIEW = URL_PARAMS.get('view')==='customer' || URL_PARAMS.get('customer')!==null;
+
+let state={products:[],orders:[],cart:[],materials:[],settings:{businessName:'ACA Custom Crafts',gcashName:'Jhon Albert Francisco',gcashNumber:'0960 658 6826'},currentPage:'dashboard',tempImageData:''};
+
+function uid(){return Math.random().toString(36).slice(2,8)}
+
+function loadAll(){
+  try{
+    state.products=JSON.parse(localStorage.getItem(LS.products)||'[]');
+    state.orders=JSON.parse(localStorage.getItem(LS.orders)||'[]');
+    state.cart=JSON.parse(localStorage.getItem(LS.cart)||'[]');
+    if(state.products.length===0) seed();
+  }catch(e){ seed(); }
+}
+function save(k){ try{ localStorage.setItem(LS[k], JSON.stringify(state[k])); }catch(e){} }
+function seed(){
+  state.products=[
+    {id:'p1',name:'Custom Tote Bag',price:250,image:'👜',imageData:'',category:'BAGS',description:'Personalized tote bag'},
+    {id:'p2',name:'Keychain Acrylic',price:80,image:'🔑',imageData:'',category:'KEYCHAIN',description:'Custom acrylic keychain'},
+    {id:'p3',name:'Mug Printing',price:180,image:'☕',imageData:'',category:'MUGS',description:'Custom mug'},
+    {id:'p4',name:'Custom ID Lace',price:120,image:'🪪',imageData:'',category:'LACE',description:'Personalized ID lace'},
+    {id:'p5',name:'T-Shirt Print',price:350,image:'👕',imageData:'',category:'SHIRT',description:'Custom t-shirt'},
+    {id:'p6',name:'Ref Magnet',price:45,image:'🧲',imageData:'',category:'SOUVENIR',description:'Custom ref magnet'},
+  ];
+  save('products');
+}
+
+function buildNav(){
+  const cartCount=state.cart.reduce((a,b)=>a+b.qty,0);
+  const items=[
+    {id:'dashboard',label:'Dashboard',icon:'📊'},
+    {id:'customer',label:`Customer Store ${cartCount? '('+cartCount+')':''}`,icon:'🛍️'},
+    {id:'products',label:'Product Catalog',icon:'📦'},
+    {id:'orders',label:`Orders (${state.orders.length})`,icon:'📋'},
+    {id:'settings',label:'Settings',icon:'⚙️'},
+  ];
+  const nav=document.getElementById('nav');
+  nav.innerHTML=items.map(it=>`<div class="nav-item ${state.currentPage===it.id?'active':''}" onclick="go('${it.id}')">${it.icon} ${it.label}</div>`).join('');
+  document.getElementById('custLink').innerText = location.origin + location.pathname.replace('index.html','') + 'customer.html';
+  document.getElementById('orderBadge').innerText = state.orders.length+' Orders';
+}
+
+window.go = (p)=>{ state.currentPage=p; buildNav(); render(); closeMobile(); }
+window.openMobile = ()=>{ document.getElementById('sidebar').classList.add('mobile-open'); document.getElementById('sidebarOverlay').classList.add('show'); }
+window.closeMobile = ()=>{ document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+window.copyLink = ()=>{
+  const link = location.origin + location.pathname.replace('index.html','') + 'customer.html';
+  navigator.clipboard.writeText(link).then(()=>alert('Copied: '+link));
+}
+window.openModal = (html)=>{ document.getElementById('modalBox').innerHTML=html; document.getElementById('modalBg').classList.add('open'); }
+window.closeModal = ()=> document.getElementById('modalBg').classList.remove('open');
+
+function render(){
+  const el=document.getElementById('content');
+  if(state.currentPage==='dashboard'){
+    const total = state.orders.reduce((s,o)=>s+(o.total||0),0);
+    el.innerHTML=`
+      <div class="grid grid-3">
+        <div class="card"><div class="card-pad"><div style="font-size:11px;color:var(--muted)">Total Orders</div><div style="font-size:28px;font-weight:800">${state.orders.length}</div></div></div>
+        <div class="card"><div class="card-pad"><div style="font-size:11px;color:var(--muted)">Revenue</div><div style="font-size:28px;font-weight:800">₱${total}</div></div></div>
+        <div class="card"><div class="card-pad"><div style="font-size:11px;color:var(--muted)">Products</div><div style="font-size:28px;font-weight:800">${state.products.length}</div><button class="btn btn-ghost" style="margin-top:8px" onclick="go('products')">Manage</button></div></div>
+      </div>
+      <div class="card" style="margin-top:16px"><div class="card-pad">
+        <h3>🔔 Live Orders (auto sync from customer.html)</h3>
+        <div style="margin-top:12px">
+          ${state.orders.length===0?'<div class="alert alert-info">No orders yet. Share: <b>'+location.origin+location.pathname.replace('index.html','')+'customer.html</b></div>' : state.orders.map(o=>`
+            <div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:${o.status==='new'?'#ecfdf5':'#fff'}">
+              <div style="display:flex;justify-content:space-between"><b>${o.id} - ${o.customerName||o.name||'Customer'}</b><span style="background:${o.status==='new'?'#10b981':'#e2e8f0'};color:${o.status==='new'?'#fff':'#000'};padding:2px 8px;border-radius:999px;font-size:11px">${o.status||'new'}</span></div>
+              <div style="font-size:12px;color:var(--muted)">${o.phone||''} • ${o.address||''} • ${o.createdAt? new Date(o.createdAt).toLocaleString() : ''}</div>
+              <div style="margin-top:6px;font-size:13px">${(o.items||[]).map(i=>i.name+' x'+i.qty).join(', ')}</div>
+              <div style="font-weight:800;color:var(--pink);margin-top:6px">₱${o.total||0} ${o.gcashRef?'• GCash: '+o.gcashRef:''}</div>
+              <div style="margin-top:8px;display:flex;gap:6px">
+                <button class="btn btn-ghost" onclick="markDone('${o.firebaseId||o.id}')">✅ Done</button>
+                <button class="btn btn-ghost" onclick="contactCustomer('${o.phone||''}','${o.id}')">📱 Contact</button>
+                <button class="btn btn-ghost" onclick="delOrder('${o.firebaseId||o.id}')">🗑️ Delete</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div></div>
+    `;
+  }else if(state.currentPage==='customer'){
+    el.innerHTML=`
+      <div style="background:var(--aca-gradient);color:#fff;border-radius:16px;padding:20px;margin-bottom:16px;text-align:center">
+        <h2>Customer Store Preview</h2><p style="opacity:.9">This is what customers see at customer.html</p>
+      </div>
+      <div class="grid grid-3">${state.products.map(p=>`
+        <div class="card"><div class="card-pad">
+          <div class="product-img">${p.imageData?`<img src="${p.imageData}">`:p.image||'📦'}</div>
+          <div style="margin-top:8px"><b>${p.name}</b><br><small style="color:var(--muted)">${p.description||''}</small><br><span style="font-weight:800;color:var(--pink)">₱${p.price}</span></div>
+          <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="addToCart('${p.id}')">Add to Cart</button>
+        </div></div>
+      `).join('')}</div>
+      <div style="margin-top:16px" class="alert alert-info">Cart: ${state.cart.reduce((s,c)=>s+c.qty,0)} items - ₱${state.cart.reduce((s,c)=>s+c.price*c.qty,0)} <button class="btn btn-ghost" onclick="checkout()">Checkout</button></div>
+    `;
+  }else if(state.currentPage==='products'){
+    el.innerHTML=`
+      <div class="card"><div class="card-pad" style="display:flex;justify-content:space-between;align-items:center"><h3>📦 Product Catalog (${state.products.length})</h3><button class="btn btn-primary" onclick="openProductModal()">＋ New Product</button></div></div>
+      <div class="grid grid-3" style="margin-top:12px">${state.products.map(p=>`
+        <div class="card"><div class="card-pad">
+          <div class="product-img">${p.imageData?`<img src="${p.imageData}">`:p.image||'📦'}</div>
+          <div style="margin-top:8px"><b>${p.name}</b> • ₱${p.price}<br><small>${p.category||''} - ${p.description||''}</small></div>
+          <div style="margin-top:8px;display:flex;gap:6px"><button class="btn btn-ghost" onclick="openProductModal('${p.id}')">Edit</button><button class="btn btn-ghost" onclick="delProduct('${p.id}')">Delete</button></div>
+        </div></div>
+      `).join('')}</div>
+      <div style="margin-top:16px" class="alert alert-success">Tip: Click Push Products to Store to sync all products to customer.html instantly!</div>
+    `;
+  }else if(state.currentPage==='orders'){
+    el.innerHTML=document.getElementById('content').innerHTML || '';
+    go('dashboard');
+  }else if(state.currentPage==='settings'){
+    el.innerHTML=`<div class="card"><div class="card-pad"><h3>⚙️ Settings</h3><p style="margin-top:8px">Business: ACA Custom Crafts</p><p>GCash: 0960 658 6826 - Jhon Albert Francisco</p><p>Firebase: aca-custom-crafts-b77c6 (connected)</p><div style="margin-top:12px" class="alert alert-info">Customer link: ${location.origin+location.pathname.replace('index.html','')+'customer.html'}</div></div></div>`;
+  }
+}
+
+window.addToCart = (id)=>{
+  const p=state.products.find(x=>x.id===id);
+  const ex=state.cart.find(x=>x.id===id);
+  if(ex) ex.qty++; else state.cart.push({...p, qty:1});
+  save('cart'); buildNav(); render();
+}
+window.checkout = ()=>{
+  const name=prompt('Customer Name:'); if(!name) return;
+  const phone=prompt('Phone:'); if(!phone) return;
+  const addr=prompt('Address:'); if(!addr) return;
+  const order={id:'ORD-'+Date.now().toString().slice(-6),customerName:name,phone:phone,address:addr,items:[...state.cart],total:state.cart.reduce((s,c)=>s+c.price*c.qty,0),status:'new',createdAt:new Date().toISOString()};
+  saveOrder(order);
+  state.cart=[]; save('cart'); render(); buildNav();
+}
+async function saveOrder(order){
+  state.orders.unshift(order); save('orders'); buildNav(); render();
+  if(db){
+    try{ await addDoc(collection(db,'orders'), {...order, serverTime: serverTimestamp()}); }catch(e){}
+  }
+}
+window.markDone = async (fid)=>{
+  try{
+    if(db && fid){ await updateDoc(doc(db,'orders',fid), {status:'done'}); }
+    state.orders = state.orders.map(o=> (o.firebaseId===fid||o.id===fid)? {...o,status:'done'}:o);
+    save('orders'); render(); buildNav();
+  }catch(e){}
+}
+window.delOrder = async (fid)=>{
+  if(!confirm('Delete order?')) return;
+  try{ if(db && fid) await deleteDoc(doc(db,'orders',fid)); }catch(e){}
+  state.orders = state.orders.filter(o=> o.firebaseId!==fid && o.id!==fid);
+  save('orders'); render(); buildNav();
+}
+window.contactCustomer = (phone,id)=>{
+  const clean=phone.replace(/[^0-9]/g,''); const ph=clean.startsWith('0')?'63'+clean.slice(1):clean;
+  window.open(`https://wa.me/${ph}?text=Hi! Your order ${id} from ACA is confirmed!`, '_blank');
+}
+window.openProductModal = (id)=>{
+  const p=id? state.products.find(x=>x.id===id):null;
+  state.tempImageData=p?.imageData||'';
+  openModal(`<div class="modal-head"><b>${p?'Edit':'New'} Product</b><button class="btn btn-ghost" onclick="closeModal()">✕</button></div><div class="modal-body">
+    <div style="margin-bottom:12px"><label>Photo</label><div class="image-upload-area" onclick="document.getElementById('imgInput').click()"><div id="imgPrev">${state.tempImageData?`<img src="${state.tempImageData}" style="width:100%;max-height:150px;object-fit:contain">`:'📸 Click to upload'}</div></div><input type="file" id="imgInput" style="display:none" accept="image/*" onchange="handleImg(event)"></div>
+    <label>Name</label><input class="input" id="pm_name" value="${p?.name||''}">
+    <label style="margin-top:8px">Category</label><input class="input" id="pm_cat" value="${p?.category||''}">
+    <label style="margin-top:8px">Description</label><input class="input" id="pm_desc" value="${p?.description||''}">
+    <label style="margin-top:8px">Price</label><input class="input" type="number" id="pm_price" value="${p?.price||0}">
+    <label style="margin-top:8px">Emoji (if no photo)</label><input class="input" id="pm_emoji" value="${p?.image||'📦'}">
+    <div style="margin-top:12px;display:flex;gap:8px"><button class="btn btn-primary" onclick="saveProduct('${p?.id||''}')">💾 Save & Sync</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>
+  </div>`);
+}
+window.handleImg = (e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  if(file.size>2*1024*1024) return alert('Max 2MB');
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      let w=img.width,h=img.height; const max=600;
+      if(w>max||h>max){ if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;} }
+      canvas.width=w;canvas.height=h; canvas.getContext('2d').drawImage(img,0,0,w,h);
+      state.tempImageData=canvas.toDataURL('image/jpeg',0.7);
+      document.getElementById('imgPrev').innerHTML=`<img src="${state.tempImageData}" style="width:100%;max-height:150px;object-fit:contain">`;
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(file);
+}
+window.saveProduct = async (id)=>{
+  const name=document.getElementById('pm_name').value.trim(); if(!name) return alert('Name required');
+  const data={id:id||uid(),name,category:document.getElementById('pm_cat').value||'OTHER',description:document.getElementById('pm_desc').value,price:parseFloat(document.getElementById('pm_price').value)||0,image:document.getElementById('pm_emoji').value||'📦',imageData:state.tempImageData||''};
+  if(id){ const i=state.products.findIndex(x=>x.id===id); state.products[i]={...state.products[i],...data}; }else state.products.push(data);
+  save('products');
+  if(db){ try{ await setDoc(doc(db,'products',data.id), data); console.log('Product synced'); }catch(e){ console.log(e); } }
+  closeModal(); render(); buildNav(); alert('Product saved & synced to customer store!');
+}
+window.delProduct = async (id)=>{
+  if(!confirm('Delete product?')) return;
+  state.products=state.products.filter(p=>p.id!==id); save('products');
+  if(db){ try{ await deleteDoc(doc(db,'products',id)); }catch(e){} }
+  render(); buildNav();
+}
+window.pushAllProducts = async ()=>{
+  if(!db) return alert('Firebase not connected');
+  if(!confirm(`Push ${state.products.length} products to customer store?`)) return;
+  for(const p of state.products){ try{ await setDoc(doc(db,'products',p.id), p); }catch(e){} }
+  alert(`✅ ${state.products.length} products pushed to customer store! Now customer.html will show them.`);
+}
+window.exportOrders = ()=>{
+  const blob=new Blob([JSON.stringify(state.orders,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ACA-Orders-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+}
+
+// Firebase live listeners for orders
+function startListeners(){
+  if(!db) return;
+  try{
+    onSnapshot(query(collection(db,'orders'), orderBy('createdAt','desc')), snap=>{
+      const list=[];
+      snap.forEach(d=> list.push({firebaseId:d.id, ...d.data()}));
+      if(list.length>0){
+        state.orders=list;
+        try{ localStorage.setItem(LS.orders, JSON.stringify(list.slice(0,200))); }catch(e){}
+        buildNav(); render();
+        document.getElementById('syncStatus').innerText='🟢 Live Sync - '+list.length+' orders';
+        document.getElementById('syncText').innerText='Firebase: '+list.length+' orders';
+      }
+    });
+  }catch(e){ console.log('Listener error',e); }
+}
+
+loadAll(); buildNav(); render(); startListeners();
+if(Notification && Notification.permission!=='granted') Notification.requestPermission();
+</script>
+</body>
+</html>
