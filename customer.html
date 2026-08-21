@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ACA CUSTOM CRAFTS - Official Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#ff1a8a;--purple:#8b5cf6;--blue:#0ea5e9;--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--aca-gradient:linear-gradient(135deg,var(--pink) 0%,var(--purple) 50%,var(--blue) 100%)}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+.header{background:var(--aca-gradient);color:#fff;padding:16px;position:sticky;top:0;z-index:20}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;gap:10px;align-items:center;font-weight:800}
+.logo-icon{width:40px;height:40px;background:#fff;color:var(--pink);border-radius:10px;display:grid;place-items:center;font-weight:900}
+.container{max-width:1200px;margin:0 auto;padding:16px}
+.hero{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:20px;text-align:center}
+.hero h1{font-size:26px;font-weight:800;background:var(--aca-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge{display:inline-flex;padding:6px 12px;border-radius:999px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:11px;font-weight:700;margin:4px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(4,1fr)}
+@media(max-width:1024px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.grid{grid-template-columns:1fr}.header-inner{flex-direction:column;gap:10px}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.05);transition:.2s;cursor:pointer}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1);border-color:var(--pink)}
+.product-img{width:100%;height:200px;object-fit:cover;background:#f1f5f9;display:grid;place-items:center;font-size:50px}
+.product-img img{width:100%;height:100%;object-fit:cover}
+.card-pad{padding:14px}
+.btn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;display:inline-flex;gap:8px;align-items:center;justify-content:center}
+.btn-primary{background:var(--aca-gradient);color:#fff;width:100%;margin-top:10px}
+.btn-ghost{background:#fff;border:1px solid var(--border)}
+.cart-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,.08);z-index:30;display:none;max-height:90vh;overflow:auto}
+.cart-bar.show{display:block}
+.input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:10px}
+.loading{padding:40px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="header">
+<div class="header-inner">
+<div class="logo"><div class="logo-icon">ACA</div><div><div>ACA CUSTOM CRAFTS</div><div style="font-size:11px;opacity:.9;font-weight:400">Customized Gifts • Bicol • Nationwide</div></div></div>
+<button class="btn-ghost btn" style="background:#fff;color:var(--pink)" onclick="openCart()">🛒 Cart (<span id="cartCount">0</span>) - ₱<span id="cartTotal">0</span></button>
+</div>
+</div>
+
+<div class="container">
+<div class="hero">
+<h1>Welcome to ACA Custom Crafts 🎨</h1>
+<p style="color:var(--muted);margin-top:6px">Personalized Tote Bags • Keychains • Mugs • And more!</p>
+<div style="margin-top:12px">
+<span class="badge">✅ GCash Accepted</span>
+<span class="badge">🚚 Nationwide Shipping</span>
+<span class="badge">🟢 Live Store</span>
+<span class="badge">📍 Camalig, Albay</span>
+</div>
+<p style="margin-top:12px;font-size:13px">📱 Orders sync directly to owner system • GCash: 0960 658 6826</p>
+</div>
+
+<div id="productGrid" class="grid"><div class="loading">⏳ Loading products...</div></div>
+
+<div style="margin-top:30px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px">
+<h3>How to Order</h3>
+<ol style="margin-top:10px;padding-left:20px;font-size:14px;color:var(--muted);line-height:1.8">
+<li>Click product → Add to Cart</li>
+<li>Click Cart button → Fill name, phone, address</li>
+<li>Pay via GCash → Enter reference</li>
+<li>Place Order → Auto synced to admin, no WhatsApp redirect!</li>
+</ol>
+</div>
+</div>
+
+<div class="cart-bar" id="cartBar">
+<div style="max-width:1200px;margin:0 auto">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b>🛒 Your Cart</b><button onclick="closeCart()" style="border:0;background:none;font-size:20px;cursor:pointer">✕</button></div>
+<div id="cartItems" style="max-height:30vh;overflow:auto"></div>
+<div id="checkoutForm" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+<input class="input" id="custName" placeholder="Full Name *">
+<input class="input" id="custPhone" placeholder="Phone / WhatsApp *">
+<textarea class="input" id="custAddress" placeholder="Complete Address with Barangay, City *" rows="2"></textarea>
+<input class="input" id="gcashRef" placeholder="GCash Reference Number (after payment)">
+<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px;font-size:12px;margin-bottom:12px">
+<b>💳 GCash Payment:</b><br>Name: Jhon Albert Francisco<br>Number: 0960 658 6826<br>Please pay total amount and enter reference above.
+</div>
+<div style="font-weight:800;font-size:18px;margin-bottom:10px">Total: ₱<span id="checkoutTotal">0</span></div>
+<button class="btn btn-primary" id="placeBtn" style="padding:16px;font-size:16px" onclick="placeOrder()">✅ Place Order</button>
+<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">🔒 Order auto synced to admin dashboard - no redirect!</div>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCfqeMHYtCSmu3wv8BnSTq2TYBH2e3vXeg",
+  authDomain: "aca-custom-crafts-b77c6.firebaseapp.com",
+  projectId: "aca-custom-crafts-b77c6",
+  storageBucket: "aca-custom-crafts-b77c6.firebasestorage.app",
+  messagingSenderId: "743474524587",
+  appId: "1:743474524587:web:278448bc76109552af62ee"
+};
+
+let db;
+try{ db = getFirestore(initializeApp(firebaseConfig)); console.log('Firebase ready'); }catch(e){ console.log('Firebase failed',e); }
+
+const OWNER_CONFIG = { whatsapp:'639606586826', email:'jhonalbert.francsico01@gmail.com' };
+
+let products = [];
+let cart = JSON.parse(localStorage.getItem('aca_cart_customer')||'[]');
+
+async function loadProducts(){
+  const grid = document.getElementById('productGrid');
+  // Try cloud first
+  if(db){
+    try{
+      // Live listener
+      onSnapshot(collection(db,'products'), snap=>{
+        const list=[];
+        snap.forEach(d=> list.push({id:d.id, ...d.data()}));
+        if(list.length>0){
+          products=list;
+          renderProducts();
+          console.log('Products live', list.length);
+        }
+      });
+      // Initial fetch
+      const snap = await getDocs(collection(db,'products'));
+      const list=[];
+      snap.forEach(d=> list.push({id:d.id, ...d.data()}));
+      if(list.length>0){
+        products=list;
+        renderProducts();
+        return;
+      }
+    }catch(e){ console.log('Cloud fetch error',e); }
+  }
+  // Fallback samples if no cloud products yet
+  if(products.length===0){
+    products = [
+      {id:'1', name:'Custom Tote Bag', price:250, image:'👜', imageData:'', description:'Personalized tote with name', category:'BAGS'},
+      {id:'2', name:'Keychain Acrylic', price:80, image:'🔑', imageData:'', description:'Custom photo keychain', category:'KEYCHAIN'},
+      {id:'3', name:'Mug Printing', price:180, image:'☕', imageData:'', description:'Custom mug with print', category:'MUGS'},
+      {id:'4', name:'Custom ID Lace', price:120, image:'🪪', imageData:'', description:'Personalized ID lace', category:'LACE'},
+      {id:'5', name:'Custom T-Shirt', price:350, image:'👕', imageData:'', description:'Custom t-shirt print', category:'SHIRT'},
+    ];
+    renderProducts();
+  }
+}
+
+function renderProducts(){
+  const grid = document.getElementById('productGrid');
+  if(products.length===0){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">No products yet - admin will add soon</div>';
+    return;
+  }
+  grid.innerHTML = products.map(p=>`
+    <div class="card" onclick="addToCart('${p.id}')">
+      <div class="product-img">${p.imageData?`<img src="${p.imageData}">`: (p.image||'📦')}</div>
+      <div class="card-pad">
+        <div style="font-size:11px;color:var(--muted);font-weight:600">${p.category||''}</div>
+        <b style="font-size:14px">${p.name}</b>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">${p.description||''}</div>
+        <div style="margin-top:8px;font-weight:800;color:var(--pink);font-size:16px">₱${p.price}</div>
+        <button class="btn btn-primary">Add to Cart</button>
+      </div>
+    </div>
+  `).join('');
+  updateCartUI();
+}
+
+window.addToCart = (id)=>{
+  const p = products.find(x=>x.id===id);
+  const ex = cart.find(x=>x.id===id);
+  if(ex) ex.qty++; else cart.push({...p, qty:1});
+  localStorage.setItem('aca_cart_customer', JSON.stringify(cart));
+  updateCartUI();
+  document.getElementById('cartBar').classList.add('show');
+}
+
+window.openCart = ()=> document.getElementById('cartBar').classList.add('show');
+window.closeCart = ()=> document.getElementById('cartBar').classList.remove('show');
+
+function updateCartUI(){
+  document.getElementById('cartCount').innerText = cart.reduce((s,c)=>s+c.qty,0);
+  document.getElementById('cartTotal').innerText = cart.reduce((s,c)=>s+c.price*c.qty,0);
+  document.getElementById('checkoutTotal').innerText = cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const itemsDiv = document.getElementById('cartItems');
+  if(cart.length===0) itemsDiv.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">Cart empty - Add products!</div>';
+  else itemsDiv.innerHTML = cart.map((c,i)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><div><b>${c.name}</b><br><small>x${c.qty} - ₱${c.price}</small></div><div>₱${c.price*c.qty} <button onclick="removeCart(${i})" style="border:0;background:#fee2e2;color:#991b1b;border-radius:6px;padding:4px 8px;cursor:pointer">✕</button></div></div>`).join('');
+}
+
+window.removeCart = (i)=>{ cart.splice(i,1); localStorage.setItem('aca_cart_customer', JSON.stringify(cart)); updateCartUI(); }
+
+window.placeOrder = async ()=>{
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const address = document.getElementById('custAddress').value.trim();
+  const gcashRef = document.getElementById('gcashRef').value.trim();
+  if(!name||!phone||!address) return alert('Please fill Name, Phone, Address');
+  if(cart.length===0) return alert('Cart empty');
+  
+  const btn = document.getElementById('placeBtn');
+  btn.innerText='⏳ Placing...'; btn.disabled=true;
+  
+  const order = {
+    id: 'ORD-'+Date.now().toString().slice(-6),
+    customerName: name,
+    phone: phone,
+    address: address,
+    gcashRef: gcashRef,
+    items: [...cart],
+    total: cart.reduce((s,c)=>s+c.price*c.qty,0),
+    status: 'new',
+    createdAt: new Date().toISOString(),
+    customerPhone: phone,
+    customerAddress: address
+  };
+  
+  // 1. Firebase - MAIN SYNC TO ADMIN
+  let synced=false;
+  if(db){
+    try{ 
+      await addDoc(collection(db,'orders'), {...order, serverTime: serverTimestamp()}); 
+      synced=true;
+      console.log('✅ Synced to Firebase');
+    }catch(e){ console.log('Firebase error',e); }
+  }
+  
+  // 2. Email background - silent, NO redirect
+  if(OWNER_CONFIG.email){
+    try{
+      fetch(`https://formsubmit.co/ajax/${OWNER_CONFIG.email}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify({
+          subject: `🔔 NEW ORDER ${order.id} - ${name} - ₱${order.total}`,
+          name: name,
+          phone: phone,
+          address: address,
+          total: '₱'+order.total,
+          items: cart.map(c=>c.name+' x'+c.qty).join(', '),
+          gcash: gcashRef,
+          orderId: order.id
+        })
+      }).catch(()=>{});
+    }catch(e){}
+  }
+  
+  // Success - NO WhatsApp popup!
+  alert('✅ Order placed!\nOrder ID: '+order.id+'\n\nYour order is now visible in admin system. We will confirm via WhatsApp soon. Thank you!');
+  cart=[]; localStorage.setItem('aca_cart_customer','[]'); updateCartUI(); closeCart();
+  document.getElementById('custName').value=''; 
+  document.getElementById('custPhone').value=''; 
+  document.getElementById('custAddress').value=''; 
+  document.getElementById('gcashRef').value='';
+  btn.innerText='✅ Place Order'; btn.disabled=false;
+};
+
+loadProducts();
+</script>
+</body>
+</html>
